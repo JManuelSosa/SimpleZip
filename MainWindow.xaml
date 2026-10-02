@@ -1,0 +1,36 @@
+﻿<Window x:Class="SimpleZip.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleZip"
+        mc:Ignorable="d"
+        Title="Prueba de compresion (Fase 1)" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen"
+ >
+    <!-- StackPanel para apilar elementos verticalmente -->
+    <StackPanel Margin="20">
+        <TextBlock Text="Ruta de la carpeta origen:" FontWeight="Bold" Margin="0, 0, 0, 5"></TextBlock>
+        <!-- TextBox para la ruta de prueba -->
+        <TextBox x:Name="txtOriginRoute" Height="30" Margin="0,0,0,15" FontSize="14"></TextBox>
+         
+        <!-- Para el nombre del zip -->
+        <TextBlock Text="Nombre del archivo zip:" FontWeight="Bold" Margin="0, 0, 0, 5"></TextBlock>
+        <TextBox x:Name="txtNameZip" Height="30" Margin="0, 0, 0, 15" FontSize="14" Text="Prueba"></TextBox>
+        
+        <!-- El evento click esta vinculado al método en el código -->
+        <Button 
+            x:Name="btnCompress" 
+            Content="Comprimir carpeta" 
+            Height="40" 
+            Margin="0,0,0,15" 
+            FontSize="14" 
+            Background="Black" 
+            Foreground="White"
+            FontWeight="Bold"
+            Click="IniciarCompresion"
+        ></Button>
+
+        <TextBlock x:Name="txtResultado" TextWrapping="Wrap" FontSize="14" Foreground="Gray"/>
+    </StackPanel>
+</Window>
