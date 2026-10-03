@@ -26,32 +26,35 @@ namespace SimpleZip
             InitializeComponent();
         }
 
-        private void IniciarCompresion(object sender, System.Windows.RoutedEventArgs e)
+        private void StartCompressBtn(object sender, RoutedEventArgs e)
         {
-            // Obtener valores de la interfaz
-            string origin = txtOriginRoute.Text.Trim();
-            string name = txtNameZip.Text.Trim();
 
-            string destiny = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-
-            try
-            {
-                // Limpiar mensajes anteriores
-                txtResultado.Foreground = System.Windows.Media.Brushes.Black;
-
-                // Llamar a la lógica central
-                string finalRoute = Compresor.Compress(origin, destiny, name);
-
-                // Si llega aquí, fue exitoso
-                txtResultado.Text = $"¡Éxito! El archivo se guardó en:\n{finalRoute}";
-                txtResultado.Foreground = System.Windows.Media.Brushes.Green;
-            }
-            catch (Exception ex)
-            {
-                txtResultado.Text = $"Error inesperado: {ex.Message}";
-                txtResultado.Foreground = System.Windows.Media.Brushes.Red;
-            }
-            
         }
+        
+        private void DropZoneDragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void DropZoneDragLeave(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void DropZoneDrop(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void SelectFolderBtn(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ExploreDirectoryBtn(object sender, RoutedEventArgs e)
+        {
+
+        }
+
     }
 }

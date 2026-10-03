@@ -5,32 +5,168 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleZip"
         mc:Ignorable="d"
-        Title="Prueba de compresion (Fase 1)" Height="450" Width="800"
+        Title="Simple Zip - Comprime tus carpetas fácil" Height="500" Width="900"
         WindowStartupLocation="CenterScreen"
  >
-    <!-- StackPanel para apilar elementos verticalmente -->
-    <StackPanel Margin="20">
-        <TextBlock Text="Ruta de la carpeta origen:" FontWeight="Bold" Margin="0, 0, 0, 5"></TextBlock>
-        <!-- TextBox para la ruta de prueba -->
-        <TextBox x:Name="txtOriginRoute" Height="30" Margin="0,0,0,15" FontSize="14"></TextBox>
-         
-        <!-- Para el nombre del zip -->
-        <TextBlock Text="Nombre del archivo zip:" FontWeight="Bold" Margin="0, 0, 0, 5"></TextBlock>
-        <TextBox x:Name="txtNameZip" Height="30" Margin="0, 0, 0, 15" FontSize="14" Text="Prueba"></TextBox>
-        
-        <!-- El evento click esta vinculado al método en el código -->
-        <Button 
-            x:Name="btnCompress" 
-            Content="Comprimir carpeta" 
-            Height="40" 
-            Margin="0,0,0,15" 
-            FontSize="14" 
-            Background="Black" 
-            Foreground="White"
-            FontWeight="Bold"
-            Click="IniciarCompresion"
-        ></Button>
+    <Border Background="#F1F3F9">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <TextBlock x:Name="txtResultado" TextWrapping="Wrap" FontSize="14" Foreground="Gray"/>
-    </StackPanel>
+            <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock 
+                    Text="SimpleZip" 
+                    FontSize="40" 
+                    FontWeight="Bold" 
+                    Foreground="#21305B" 
+                    TextAlignment="Center"
+                >
+                </TextBlock>
+                <TextBlock
+                    Text="Comprime tus carpetas de forma fácil"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Foreground="#21305B"
+                    TextAlignment="Center"
+                >
+                </TextBlock>
+            </StackPanel>
+
+            <Border 
+                Grid.Row="1" 
+                Background="#CCD9F7" 
+                CornerRadius="64" 
+                BorderBrush="#869FE0"
+                BorderThickness="3"
+                MaxWidth="540"
+            >
+                <Grid>
+                    <StackPanel 
+                        x:Name="StateEmpty" 
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center" 
+                        Cursor="Hand" 
+                        MouseLeftButtonDown="SelectFolderBtn"
+                        AllowDrop="True"
+                        DragEnter="DropZoneDragEnter"
+                        DragLeave="DropZoneDragLeave"
+                        Drop="DropZoneDrop"
+                    >
+                        <Path Data="M440-280h80v-168l64 64 56-56-160-160-160 160 56 56 64-64v168ZM160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Zm0-80h640v-400H447l-80-80H160v480Zm0 0v-480 480Z"
+                          Fill="#4A6BD1"       
+                          Width="64"          
+                          Height="64"         
+                          Stretch="Uniform"   
+                          HorizontalAlignment="Center"
+                          Margin="0,0,0,10"
+                        />
+                        <TextBlock Text="Arrastra tu carpeta aquí" FontSize="28" Foreground="#4A6BD1" FontWeight="Bold"/>
+                        <TextBlock Text="O haz click aqui para explorar" FontSize="20" Foreground="#4A6BD1" HorizontalAlignment="Center"></TextBlock>
+                    </StackPanel>
+
+                    <StackPanel 
+                        x:Name="StateLoaded"  
+                        Visibility="Collapsed"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Margin="20"
+                    >
+                        <Path 
+                            Data="M160-240v-480 212-12 280Zm0 80q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v171q-18-13-38-22.5T800-508v-132H447l-80-80H160v480h280q0 21 3 41t9 39H160Zm531 10 139-138-42-42-97 95-39-39-42 43 81 81Zm170.5-231.5Q920-323 920-240T861.5-98.5Q803-40 720-40T578.5-98.5Q520-157 520-240t58.5-141.5Q637-440 720-440t141.5 58.5Z"  
+                            Fill="#4A6BD1"
+                            Width="64"
+                            Height="64"
+                            Stretch="Uniform"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,0"
+                        />
+                        <TextBlock 
+                            Text="Carpeta lista para comprimir" 
+                            FontSize="28"
+                            Foreground="#4A6BD1"
+                            FontWeight="Bold"
+                            TextAlignment="Center"
+                            Margin="0,0,0,5"
+                        />
+                        <TextBlock 
+                            x:Name="TxtFolderName" 
+                            Text="Nombre_de_la_carpeta" 
+                            FontSize="18" 
+                            Foreground="#4A6BD1" 
+                            FontWeight="SemiBold" 
+                            HorizontalAlignment="Center" 
+                            TextTrimming="CharacterEllipsis" 
+                            MaxWidth="400"
+                         />
+                        
+                        <Button
+                            x:Name="BtnCompress"
+                            Content="Comprimir"
+                            Margin="0, 20, 0, 0"
+                            Padding="30,12"
+                            Background="#63D921"
+                            Foreground="White"
+                            FontSize="18"
+                            FontWeight="DemiBold"
+                            Cursor="Hand"
+                            Click="StartCompressBtn"
+                        >
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border 
+                                        Background="{TemplateBinding Background}"
+                                        CornerRadius="12"
+                                        Padding="{TemplateBinding Padding}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                    >
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="2" Margin="0, 20, 0, 0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+
+                <Button 
+                    Grid.Column="1" 
+                    Content="Ver carpeta de zips" 
+                    Padding="20,10" 
+                    Background="#4A6BD1"
+                    Foreground="#E7ECF7"
+                    FontSize="18"
+                    BorderBrush="#869FE0"
+                    BorderThickness="1"
+                    Cursor="Hand"
+                    Click="ExploreDirectoryBtn"
+                >
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12"
+                                Padding="{TemplateBinding Padding}"
+                            >
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"></ContentPresenter>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>
