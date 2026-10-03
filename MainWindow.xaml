@@ -42,6 +42,7 @@
                 BorderBrush="#869FE0"
                 BorderThickness="3"
                 MaxWidth="540"
+                x:Name="DropZoneBorder"
             >
                 <Grid>
                     <StackPanel 
