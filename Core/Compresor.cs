@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace SimpleZip.Core
 {
@@ -21,7 +22,10 @@ namespace SimpleZip.Core
 
             if (!Directory.Exists(originalFolder)) 
                 throw new InvalidOperationException("La carpeta ingresada no existe o no se puede operar sobre ella");
-            
+
+            if (!Directory.EnumerateFileSystemEntries(originalFolder).Any())
+                throw new InvalidOperationException("La carpeta esta vacía, agregue al menos 1 archivo para comprimir");
+
             string originFolderNorm = Path.GetFullPath(originalFolder).TrimEnd('\\') + '\\';
             string destinationFolderNorm = Path.GetFullPath(destinationFolder).TrimEnd('\\') + '\\';
 
