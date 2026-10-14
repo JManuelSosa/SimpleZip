@@ -83,6 +83,9 @@ namespace SimpleZip
             TxtFolderName.Text = folderName;
             StateEmpty.Visibility = Visibility.Collapsed;
             StateLoaded.Visibility = Visibility.Visible;
+
+            TxtFolderName.SelectAll();
+            TxtFolderName.Focus();
         }
 
         private void ShowErrorMessage(string message)

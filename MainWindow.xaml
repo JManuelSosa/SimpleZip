@@ -92,17 +92,19 @@
                             TextAlignment="Center"
                             Margin="0,0,0,5"
                         />
-                        <TextBlock 
-                            x:Name="TxtFolderName" 
-                            Text="Nombre_de_la_carpeta" 
-                            FontSize="18" 
-                            Foreground="#4A6BD1" 
-                            FontWeight="SemiBold" 
-                            HorizontalAlignment="Center" 
-                            TextTrimming="CharacterEllipsis" 
+                        <TextBox 
+                            x:Name="TxtFolderName"
+                            Text="Nombre_de_la_carpeta"
+                            FontSize="18"
+                            Foreground="#4A6BD1"
+                            Background="#F1F3F9"
+                            FontWeight="SemiBold"
                             MaxWidth="400"
-                         />
-                        
+                            MinWidth="250"
+                            TextAlignment="Center"
+                            Padding="3"
+                        />
+
                         <Button
                             x:Name="BtnCompress"
                             Content="Comprimir"
@@ -128,7 +130,7 @@
                                 </ControlTemplate>
                             </Button.Template>
                         </Button>
-                        
+
                     </StackPanel>
 
                 </Grid>
