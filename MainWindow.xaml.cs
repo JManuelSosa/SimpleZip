@@ -62,7 +62,6 @@ namespace SimpleZip
                 MessageBox.Show($"¡Listo! Tu archivo quedó en la carpeta '{FolderZips}' del Escritorio: \n\n{finalRoute}", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{finalRoute}\"");
 
-                ResetUI();
             }
             catch(InvalidOperationException ex)
             {
@@ -77,6 +76,8 @@ namespace SimpleZip
                 BtnCompress.IsEnabled = true;
                 BtnCompress.Content = "Comprimir";
                 TxtFolderName.IsEnabled = true;
+
+                ResetUI();
             }
 
         }
@@ -143,6 +144,12 @@ namespace SimpleZip
             {
                 ShowErrorMessage("No se pudo abrir la carpeta de destino.");
             }
+        }
+
+        private void RetryBtn(object sender, RoutedEventArgs e)
+        {
+            ResetUI();
+            SelectFolderBtn(sender, e);
         }
 
         private void ProcessRoute(string route)
