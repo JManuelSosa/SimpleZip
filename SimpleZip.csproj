@@ -58,6 +58,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\FolderValidations.cs" />
     <Compile Include="Services\ColorUtilities.cs" />
     <Compile Include="Services\FolderSelector.cs" />
     <Page Include="MainWindow.xaml">
