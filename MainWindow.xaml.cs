@@ -138,7 +138,11 @@ namespace SimpleZip
             try
             {
                 Directory.CreateDirectory(zipFolderPath);
-                System.Diagnostics.Process.Start("explorer.exe", zipFolderPath);
+
+                if (!WindowHelper.FocusIfAlreadyOpen(zipFolderPath))
+                {
+                    System.Diagnostics.Process.Start("explorer.exe",zipFolderPath);
+                }
             }
             catch (Exception)
             {
