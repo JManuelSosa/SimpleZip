@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace SimpleZip.Core
 {
     public static class Compresor
     {
-        public static string Compress(string originalFolder, string destinationFolder, string folderName)
+        public static string Compress(string originalFolder, string destinationFolder, string folderName, CancellationToken cancellationToken = default)
         {
             // Verificación y normalización de rutas
             if (string.IsNullOrWhiteSpace(originalFolder) || string.IsNullOrWhiteSpace(destinationFolder)) 
@@ -31,6 +32,8 @@ namespace SimpleZip.Core
             if (destinationFolderNorm.StartsWith(originFolderNorm, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("No se puede guardar el Zip dentro de la misma carpeta que se comprime");
 
+            CleanTmpFiles(destinationFolderNorm);
+
             // Preparación de rutas para operar
             string baseRoute = Path.Combine(destinationFolderNorm, folderName);
             string finalRoute = baseRoute + ".zip";
@@ -38,8 +41,10 @@ namespace SimpleZip.Core
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 // Creación del .zip
                 ZipFile.CreateFromDirectory(originFolderNorm, tmpRoute, CompressionLevel.Optimal, true);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (File.Exists(finalRoute))
                 {
@@ -51,6 +56,10 @@ namespace SimpleZip.Core
 
                 // Retornar la nueva ruta
                 return finalRoute;
+            }
+            catch(OperationCanceledException)
+            {
+                throw;
             }
             catch (UnauthorizedAccessException) {
                 throw new InvalidOperationException("No tenemos permiso para acceder a algunos archivos, asegúrese que no estan siendo usados por otro programa");
@@ -76,5 +85,18 @@ namespace SimpleZip.Core
             }            
         }
 
+        private static void CleanTmpFiles(string destinationFolderNorm)
+        {
+            try
+            {
+                string[] tmpFiles = Directory.GetFiles(destinationFolderNorm, "*.tmp");
+
+                foreach (string tmpFile in tmpFiles)
+                {
+                    File.Delete(tmpFile);
+                }
+            }
+            catch { }
+        }
     }
 }

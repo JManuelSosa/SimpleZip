@@ -1,5 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using SimpleZip.Core;
@@ -16,6 +19,7 @@ namespace SimpleZip
 
         private string _routeOriginFolder;
         private const string FolderZips = "SimpleZip - Carpetas comprimidas";
+        private CancellationTokenSource _cancellationTokenSource;
         public MainWindow()
         {
             InitializeComponent();
@@ -49,6 +53,9 @@ namespace SimpleZip
             TxtFolderName.IsEnabled = false;
             BtnCompress.IsEnabled = false;
             BtnCompress.Content = "Procesando ...";
+            BtnRetry.IsEnabled = false;
+
+            _cancellationTokenSource = new CancellationTokenSource();
 
             // Inicializamos compresión
             try
@@ -56,14 +63,18 @@ namespace SimpleZip
                 // Comprensión en segundo plano
                 string finalRoute = await Task.Run(() => 
                 {
-                    return SimpleZip.Core.Compresor.Compress(_routeOriginFolder, zipFolderPath, finalName);
-                });
+                    return SimpleZip.Core.Compresor.Compress(_routeOriginFolder, zipFolderPath, finalName, _cancellationTokenSource.Token);
+                }, _cancellationTokenSource.Token);
 
                 MessageBox.Show($"¡Listo! Tu archivo quedó en la carpeta '{FolderZips}' del Escritorio: \n\n{finalRoute}", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
                 System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{finalRoute}\"");
 
             }
-            catch(InvalidOperationException ex)
+            catch(OperationCanceledException)
+            {
+                return;
+            }
+            catch(Exception ex) when (ex is InvalidOperationException || ex is IOException || ex is UnauthorizedAccessException)
             {
                 ShowErrorMessage(ex.Message);
             }
@@ -73,9 +84,13 @@ namespace SimpleZip
             }
             finally
             {
+                _cancellationTokenSource?.Dispose();
+                _cancellationTokenSource = null;
+
                 BtnCompress.IsEnabled = true;
                 BtnCompress.Content = "Comprimir";
                 TxtFolderName.IsEnabled = true;
+                BtnRetry.IsEnabled = true;
 
                 ResetUI();
             }
@@ -170,6 +185,26 @@ namespace SimpleZip
                 return;
             }
 
+            if(Path.GetPathRoot(route) == route)
+            {
+                ShowErrorMessage("Has seleccionado una unidad completa. Por favor, selecciona una carpeta específica dentro de la unidad.");
+                return;
+            }
+
+            string[] carpetasSistema = {
+                @"C:\Windows",
+                @"C:\Program Files",
+                @"C:\Program Files (x86)",
+                @"C:\ProgramData"
+            };
+
+            string routeNorm = Path.GetFullPath(route).TrimEnd('\\');
+            if (carpetasSistema.Any(s => routeNorm.Equals(s, StringComparison.OrdinalIgnoreCase)))
+            {
+                ShowErrorMessage("No se puede comprimir una carpeta del sistema. Por favor, selecciona una carpeta de usuario.");
+                return;
+            }
+
             _routeOriginFolder = route;
             string cleanRoute = route.TrimEnd(Path.DirectorySeparatorChar);
             string folderName = Path.GetFileName(cleanRoute);
@@ -230,6 +265,25 @@ namespace SimpleZip
             TxtFolderName.Text = "";
             StateEmpty.Visibility = Visibility.Visible;
             StateLoaded.Visibility = Visibility.Collapsed;
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (!BtnCompress.IsEnabled)
+            {
+                string msg = "Hay una compresión en proceso. Si cierras ahora, el archivo no se completará. \n\n" +
+                "¿Deseas cerrar de todos modos?";
+
+                var result = MessageBox.Show(msg, "¿Estas seguro que quieres salir?", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if(result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                base.OnClosing(e);
+            }
         }
     }
 }
