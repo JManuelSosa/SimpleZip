@@ -62,10 +62,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Core\FolderValidations.cs" />
+    <Compile Include="CustomMessageBox.xaml.cs">
+      <DependentUpon>CustomMessageBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\ColorUtilities.cs" />
     <Compile Include="Services\FileService.cs" />
     <Compile Include="Services\FolderSelector.cs" />
     <Compile Include="Services\WindowHelper.cs" />
+    <Page Include="CustomMessageBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
