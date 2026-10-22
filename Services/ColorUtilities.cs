@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace SimpleZip.Services
 {
-    public enum BackgroundStates
+    public enum UIColorStates
     {
         Hover,
         Default
@@ -16,15 +16,31 @@ namespace SimpleZip.Services
 
     public static class ColorUtilities
     {
-        public static SolidColorBrush GetColorBrush(BackgroundStates state)
+        private static SolidColorBrush GetColorBrush(UIColorStates state, string defaultColor, string hoverColor)
         {
             string color = null;
 
-            if (state == BackgroundStates.Hover) color = "#869FE0";
-            if (state == BackgroundStates.Default) color = "#CCD9F7";
+            if (state == UIColorStates.Hover) color = hoverColor;
+            if (state == UIColorStates.Default) color = defaultColor;
 
             return new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
 
+        }
+
+        public static SolidColorBrush BackgroundDropZoneColor(UIColorStates state)
+        {
+            return GetColorBrush(state, "#CCD9F7", "#869FE0");
+        }
+
+        public static SolidColorBrush BtnCancelColor(UIColorStates state)
+        {
+            return GetColorBrush(state, "#E74C3C", "#852B24");
+        }
+
+        public static SolidColorBrush BtnRetryColor(UIColorStates state)
+        {
+
+            return GetColorBrush(state, Colors.Transparent.ToString(), "#BACBF2");
         }
     }
 }
