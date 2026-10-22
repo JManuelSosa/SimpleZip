@@ -13,12 +13,8 @@ using Path = System.IO.Path;
 
 namespace SimpleZip
 {
-    /// <summary>
-    /// Lógica de interacción para MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-
         private string _routeOriginFolder;
         private const string FolderZips = "SimpleZip - Carpetas comprimidas";
         private CancellationTokenSource _cancellationTokenSource;
@@ -86,7 +82,6 @@ namespace SimpleZip
                 _cancellationTokenSource = null;
 
                 HandleFinalizeProcessUI();
-
                 ResetUI();
             }
 
@@ -130,13 +125,13 @@ namespace SimpleZip
 
             string route = routes[0];
 
-            ProcessRoute(route);
+            ProcessFolderRoute(route);
         }
 
         private void SelectFolderBtn(object sender, RoutedEventArgs e)
         {
             string route = FolderSelector.GetFolderRoute();
-            if(!string.IsNullOrEmpty(route)) ProcessRoute(route);
+            if(!string.IsNullOrEmpty(route)) ProcessFolderRoute(route);
         }
 
         private void ExploreDirectoryBtn(object sender, RoutedEventArgs e)
@@ -165,52 +160,6 @@ namespace SimpleZip
             SelectFolderBtn(sender, e);
         }
 
-        private void ProcessRoute(string route)
-        {
-            if (File.Exists(route))
-            {
-                ShowErrorMessage("Has seleccionado un archivo suelto. Por favor, selecciona o arrastra una carpeta completa");
-                return;
-            }
-
-            if (!Directory.Exists(route))
-            {
-                ShowErrorMessage("El elemento agregado no es una carpeta, por favor verifique");
-                return;
-            }
-
-            if(Path.GetPathRoot(route) == route)
-            {
-                ShowErrorMessage("Has seleccionado una unidad completa. Por favor, selecciona una carpeta específica dentro de la unidad.");
-                return;
-            }
-
-            string[] carpetasSistema = {
-                @"C:\Windows",
-                @"C:\Program Files",
-                @"C:\Program Files (x86)",
-                @"C:\ProgramData"
-            };
-
-            string routeNorm = Path.GetFullPath(route).TrimEnd('\\');
-            if (carpetasSistema.Any(s => routeNorm.Equals(s, StringComparison.OrdinalIgnoreCase)))
-            {
-                ShowErrorMessage("No se puede comprimir una carpeta del sistema. Por favor, selecciona una carpeta de usuario.");
-                return;
-            }
-
-            _routeOriginFolder = route;
-            string cleanRoute = route.TrimEnd(Path.DirectorySeparatorChar);
-            string folderName = Path.GetFileName(cleanRoute);
-
-            TxtFolderName.Text = folderName;
-            StateEmpty.Visibility = Visibility.Collapsed;
-            StateLoaded.Visibility = Visibility.Visible;
-
-            TxtFolderName.SelectAll();
-            TxtFolderName.Focus();
-        }
-
         private void CancelCompressBtn(object sender, RoutedEventArgs e)
         {
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
@@ -225,15 +174,33 @@ namespace SimpleZip
             }
         }
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+            {
+                string msg = "Hay una compresión en proceso. Si cierras ahora, el archivo no se completará. \n\n" +
+                "¿Deseas cerrar de todos modos?";
+
+                var result = MessageBox.Show(msg, "¿Estas seguro que quieres salir?", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+
+                _cancellationTokenSource.Cancel();
+            }
+
+            base.OnClosing(e);
+        }
+
         private string ResolveZipFileName(string destinationPath, string filename)
         {
-            string baseName = filename.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ? filename.Substring(0, filename.Length - 4) : filename;
+            string baseName = FileService.RemoveExtension(filename, ".zip");
             string finalZipPath = Path.Combine(destinationPath, $"{baseName}.zip");
 
-            if (!File.Exists(finalZipPath))
-            {
-                return baseName;
-            }
+            if (!File.Exists(finalZipPath)) return baseName;
 
             string message = $"Ya existe un archivo llamado '{Path.GetFileName(finalZipPath)}' en la carpeta '{FolderZips}' del Escritorio.\n\n" +
                      "¿Desea reemplazar la carpeta? \n\n" +
@@ -248,13 +215,7 @@ namespace SimpleZip
                     return baseName;
 
                 case MessageBoxResult.No:
-                    int counter = 1;
-                    
-                    while(File.Exists(Path.Combine(destinationPath, $"{baseName} ({counter}).zip")))
-                    {
-                        counter++;
-                    }
-                    return $"{baseName} ({counter})";
+                    return FileService.GetNextAvailableNumberedZip(destinationPath, baseName);
 
                 case MessageBoxResult.Cancel:
                 default:
@@ -275,36 +236,40 @@ namespace SimpleZip
             StateLoaded.Visibility = Visibility.Collapsed;
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        private void ProcessFolderRoute(string route)
         {
-            if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+            string error = FolderValidations.ValidateFolder(route);
+
+            if (!string.IsNullOrEmpty(error))
             {
-                string msg = "Hay una compresión en proceso. Si cierras ahora, el archivo no se completará. \n\n" +
-                "¿Deseas cerrar de todos modos?";
-
-                var result = MessageBox.Show(msg, "¿Estas seguro que quieres salir?", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if(result == MessageBoxResult.No)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-
-                _cancellationTokenSource.Cancel();
+                ShowErrorMessage(error);
+                return;
             }
 
-            base.OnClosing(e);
+            LoadSelectedFolder(route);
+        }
+
+        private void LoadSelectedFolder(string folderPath)
+        {
+            _routeOriginFolder = folderPath;
+            string cleanRoute = folderPath.TrimEnd(Path.DirectorySeparatorChar);
+            string folderName = Path.GetFileName(cleanRoute);
+
+            TxtFolderName.Text = folderName;
+            StateEmpty.Visibility = Visibility.Collapsed;
+            StateLoaded.Visibility = Visibility.Visible;
+
+            TxtFolderName.SelectAll();
+            TxtFolderName.Focus();
         }
 
         private void HandleStartCompressUI(string textFolderName)
         {
-            // Preparar UI para procesamiento
-
-            // Cambio en el nombre de carpeta
+            // Nombre de carpeta
             TxtFolderName.Text = textFolderName;
             TxtFolderName.IsEnabled = false;
 
-            // Activación/Desactivación de botones
+            // Botón compresión
             BtnCompress.IsEnabled = false;
             BtnCompress.Visibility = Visibility.Collapsed;
 
@@ -319,26 +284,34 @@ namespace SimpleZip
             BtnCancel.IsEnabled = true;
             BtnCancel.Visibility = Visibility.Visible;
 
+            // Botón de seleccionar otra carpeta
             BtnRetry.IsEnabled = false;
             BtnRetry.Background = ColorUtilities.BtnRetryColor(UIColorStates.Hover);
         }
 
         private void HandleFinalizeProcessUI()
         {
-            BtnRetry.IsEnabled = true;
-            BtnRetry.Background = ColorUtilities.BtnRetryColor(UIColorStates.Default);
+            // Nombre carpeta
+            TxtFolderName.IsEnabled = true;
 
+            // Botón compresión
             BtnCompress.IsEnabled = true;
             BtnCompress.Visibility = Visibility.Visible;
 
+            // Grid de boton de cancelar y boton de comprimir
             GridUIBtns.Margin = new Thickness(GridUIBtns.Margin.Left, 20, GridUIBtns.Margin.Right, GridUIBtns.Margin.Bottom);
 
-            TxtFolderName.IsEnabled = true;
+            //Texto de mensaje de compresión
             TxtProcesingCompress.Visibility = Visibility.Collapsed;
 
+            // Botón de cancelación
             BtnCancel.IsEnabled = false;
             BtnCancel.Background = ColorUtilities.BtnCancelColor(UIColorStates.Default);
             BtnCancel.Visibility = Visibility.Collapsed;
+
+            // Botón de seleccionar otra carpeta
+            BtnRetry.IsEnabled = true;
+            BtnRetry.Background = ColorUtilities.BtnRetryColor(UIColorStates.Default);
         }
 
     }

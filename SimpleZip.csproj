@@ -60,6 +60,7 @@
     </ApplicationDefinition>
     <Compile Include="Core\FolderValidations.cs" />
     <Compile Include="Services\ColorUtilities.cs" />
+    <Compile Include="Services\FileService.cs" />
     <Compile Include="Services\FolderSelector.cs" />
     <Compile Include="Services\WindowHelper.cs" />
     <Page Include="MainWindow.xaml">
