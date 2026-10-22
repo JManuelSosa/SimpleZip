@@ -12,6 +12,32 @@ namespace SimpleZip.Core
 {
     public static class FolderValidations
     {
+        private static readonly string[] _systemFolders = {
+            @"C:\Windows",
+            @"C:\Program Files",
+            @"C:\Program Files (x86)",
+            @"C:\ProgramData"
+        };
+
+        public static string ValidateFolder(string path)
+        {
+            if (File.Exists(path)) return "Has seleccionado un archivo suelto. Por favor, selecciona o arrastra una carpeta completa";
+            
+            if (!Directory.Exists(path)) return "El elemento agregado no es una carpeta, por favor verifique";
+          
+            if (Path.GetPathRoot(path) == path) return "Has seleccionado una unidad completa. Por favor, selecciona una carpeta específica dentro de la unidad.";
+            
+
+            string routeNorm = Path.GetFullPath(path).TrimEnd('\\');
+
+            if (_systemFolders.Any(s => routeNorm.Equals(s, StringComparison.OrdinalIgnoreCase)))
+            {
+                return "No se puede comprimir una carpeta del sistema. Por favor, selecciona una carpeta de usuario.";
+            }
+
+            return null;
+        }
+
         public static string ValidateFolderName(string folderName)
         {
             string errMsg = string.Empty;
