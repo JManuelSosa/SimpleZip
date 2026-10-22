@@ -31,7 +31,7 @@ namespace SimpleZip
 
             if(!string.IsNullOrEmpty(errMsg))
             {
-                ShowErrorMessage(errMsg);
+                ShowCustomMessage(errMsg, "Atención");
                 return;
             }
 
@@ -59,22 +59,22 @@ namespace SimpleZip
                     return SimpleZip.Core.Compresor.Compress(_routeOriginFolder, zipFolderPath, finalName, _cancellationTokenSource.Token);
                 }, _cancellationTokenSource.Token);
 
-                MessageBox.Show($"¡Listo! Tu archivo quedó en la carpeta '{FolderZips}' del Escritorio: \n\n{finalRoute}", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowCustomMessage($"¡Listo! Tu archivo quedó en la carpeta '{FolderZips}' del Escritorio: \n\n{finalRoute}", "Compresión exitosa");
                 System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{finalRoute}\"");
 
             }
             catch(OperationCanceledException)
             {
-                MessageBox.Show("La compresión fue cancelada.", "Cancelado", MessageBoxButton.OK, MessageBoxImage.Information);
+                ShowCustomMessage("La compresión fue cancelada existosamente", "Cancelar");
                 return;
             }
             catch(Exception ex) when (ex is InvalidOperationException || ex is IOException || ex is UnauthorizedAccessException)
             {
-                ShowErrorMessage(ex.Message);
+                ShowCustomMessage(ex.Message, "Error");
             }
             catch (Exception)
             {
-                ShowErrorMessage("Ocurrió un error inesperado. Cierre los documentos de esa carpeta e inténtelo de nuevo");
+                ShowCustomMessage("Ocurrió un error inesperado. Cierre los documentos de esa carpeta e inténtelo de nuevo", "Error");
             }
             finally
             {
@@ -111,7 +111,7 @@ namespace SimpleZip
 
             if (!e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                ShowErrorMessage("El elemento agregado no es válido, por favor verifique");
+                ShowCustomMessage("El elemento agregado no es válido, por favor verifique", "Atención");
                 return;
             }
 
@@ -119,7 +119,7 @@ namespace SimpleZip
 
             if(routes.Length > 1)
             {
-                ShowErrorMessage("Por favor, arrastra solo una carpeta a la vez");
+                ShowCustomMessage("Por favor, arrastra solo una carpeta a la vez", "Atención");
                 return;
             }
 
@@ -150,7 +150,7 @@ namespace SimpleZip
             }
             catch (Exception)
             {
-                ShowErrorMessage("No se pudo abrir la carpeta de destino.");
+                ShowCustomMessage("No se pudo abrir la carpeta de destino.", "Error");
             }
         }
 
@@ -181,7 +181,7 @@ namespace SimpleZip
                 string msg = "Hay una compresión en proceso. Si cierras ahora, el archivo no se completará. \n\n" +
                 "¿Deseas cerrar de todos modos?";
 
-                var result = MessageBox.Show(msg, "¿Estas seguro que quieres salir?", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                var result = ShowCustomMessage(msg, "¿Estas seguro que quieres salir?", MessageBoxButton.YesNo);
 
                 if (result == MessageBoxResult.No)
                 {
@@ -207,7 +207,7 @@ namespace SimpleZip
                      "Sí: Reemplazar el archivo existente.\n" +
                      "No: Guardar una copia con un número correlativo.\n";
 
-            var result = MessageBox.Show(message, "Archivo existente", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            var result = ShowCustomMessage(message, "Archivo existente", MessageBoxButton.YesNoCancel);
 
             switch (result)
             {
@@ -242,7 +242,7 @@ namespace SimpleZip
 
             if (!string.IsNullOrEmpty(error))
             {
-                ShowErrorMessage(error);
+                ShowCustomMessage(error, "Atención");
                 return;
             }
 
@@ -312,6 +312,14 @@ namespace SimpleZip
             // Botón de seleccionar otra carpeta
             BtnRetry.IsEnabled = true;
             BtnRetry.Background = ColorUtilities.BtnRetryColor(UIColorStates.Default);
+        }
+
+        private MessageBoxResult ShowCustomMessage(string message, string title = "SimpleZip", MessageBoxButton buttons = MessageBoxButton.OK)
+        {
+            var msgBox = new CustomMessageBox(message, title, buttons);
+            msgBox.Owner = this;
+            msgBox.ShowDialog();
+            return msgBox.Result;
         }
 
     }
