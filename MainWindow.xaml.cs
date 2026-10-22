@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using SimpleZip.Core;
 using SimpleZip.Services;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 using Path = System.IO.Path;
+
 
 namespace SimpleZip
 {
@@ -95,7 +97,7 @@ namespace SimpleZip
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effects = DragDropEffects.Copy;
-                DropZoneBorder.Background = ColorUtilities.GetColorBrush(BackgroundStates.Hover);
+                DropZoneBorder.Background = ColorUtilities.BackgroundDropZoneColor(UIColorStates.Hover);
             }
             else
             {
@@ -105,12 +107,12 @@ namespace SimpleZip
 
         private void DropZoneDragLeave(object sender, DragEventArgs e)
         {
-            DropZoneBorder.Background = ColorUtilities.GetColorBrush(BackgroundStates.Default);
+            DropZoneBorder.Background = ColorUtilities.BackgroundDropZoneColor(UIColorStates.Default);
         }
 
         private void DropZoneDrop(object sender, DragEventArgs e)
         {
-            DropZoneBorder.Background = ColorUtilities.GetColorBrush(BackgroundStates.Default);
+            DropZoneBorder.Background = ColorUtilities.BackgroundDropZoneColor(UIColorStates.Default);
 
             if (!e.Data.GetDataPresent(DataFormats.FileDrop))
             {
@@ -214,7 +216,12 @@ namespace SimpleZip
             if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
             {
                 _cancellationTokenSource.Cancel();
+
+                // UI de cancelación
                 BtnCancel.IsEnabled = false;
+                BtnCancel.Background = ColorUtilities.BtnCancelColor(UIColorStates.Hover);
+
+                TxtProcesingCompress.Text = "Cancelando comprensión, por favor espere ...";
             }
         }
 
@@ -301,19 +308,25 @@ namespace SimpleZip
             BtnCompress.IsEnabled = false;
             BtnCompress.Visibility = Visibility.Collapsed;
 
+            // Grid de boton de cancelar y boton de comprimir
             GridUIBtns.Margin = new Thickness(GridUIBtns.Margin.Left, 8, GridUIBtns.Margin.Right, GridUIBtns.Margin.Bottom);
 
+            // Texto de mensaje de compresión
+            TxtProcesingCompress.Text = "Comprimiendo carpeta por favor espere ...";
             TxtProcesingCompress.Visibility = Visibility.Visible;
 
+            // Botón de cancelación
             BtnCancel.IsEnabled = true;
             BtnCancel.Visibility = Visibility.Visible;
 
             BtnRetry.IsEnabled = false;
+            BtnRetry.Background = ColorUtilities.BtnRetryColor(UIColorStates.Hover);
         }
 
         private void HandleFinalizeProcessUI()
         {
             BtnRetry.IsEnabled = true;
+            BtnRetry.Background = ColorUtilities.BtnRetryColor(UIColorStates.Default);
 
             BtnCompress.IsEnabled = true;
             BtnCompress.Visibility = Visibility.Visible;
@@ -324,6 +337,7 @@ namespace SimpleZip
             TxtProcesingCompress.Visibility = Visibility.Collapsed;
 
             BtnCancel.IsEnabled = false;
+            BtnCancel.Background = ColorUtilities.BtnCancelColor(UIColorStates.Default);
             BtnCancel.Visibility = Visibility.Collapsed;
         }
 
