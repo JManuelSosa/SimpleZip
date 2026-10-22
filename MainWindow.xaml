@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="Simple Zip - Comprime tus carpetas fácil" Height="560" Width="900" ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen"
+        Icon="/Resources/SimpleZip.ico"
  >
     <Border Background="#F1F3F9">
         <Grid Margin="20">
@@ -131,6 +132,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border 
+                                            x:Name="BorderRoot"
                                             Background="{TemplateBinding Background}"
                                             CornerRadius="12"
                                             Padding="{TemplateBinding Padding}"
@@ -138,6 +140,17 @@
                                         >
                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
+                                        <ControlTemplate.Triggers>
+                                            <!-- Estado Hover -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="BorderRoot" Property="Background" Value="#55C01A"/>
+                                            </Trigger>
+                                            <!-- Estado Deshabilitado -->
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="BorderRoot" Property="Background" Value="#A0D98F"/>
+                                                <Setter Property="Cursor" Value="Arrow"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
@@ -158,6 +171,7 @@
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border 
+                                            x:Name="BorderCancelBtn"
                                             Background="{TemplateBinding Background}"
                                             CornerRadius="12"
                                             Padding="{TemplateBinding Padding}"
@@ -165,6 +179,16 @@
                                         >
                                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
+                                        <ControlTemplate.Triggers>
+                                            <!-- Estado Hover -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="BorderCancelBtn" Property="Background" Value="#852B24"/>
+                                            </Trigger>
+                                            <!-- Estado Deshabilitado -->
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="BorderCancelBtn" Property="Cursor" Value="No"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
                             </Button>
