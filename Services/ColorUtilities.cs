@@ -34,7 +34,7 @@ namespace SimpleZip.Services
 
         public static SolidColorBrush BtnCancelColor(UIColorStates state)
         {
-            return GetColorBrush(state, "#E74C3C", "#852B24");
+            return GetColorBrush(state, "#E74C3C", "#F59F95");
         }
 
         public static SolidColorBrush BtnRetryColor(UIColorStates state)
