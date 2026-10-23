@@ -1,0 +1,27 @@
+﻿<Window x:Class="SimpleZip.CustomMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleZip"
+        mc:Ignorable="d"
+        Title="SimpleZip" MaxHeight="600" Width="450" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        MouseDown="Window_MouseDown">
+    <Border Background="#F1F3F9" CornerRadius="12" BorderBrush="#CCD9F7" BorderThickness="2" Padding="24">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock x:Name="TxtTitle" Text="Atención" FontSize="20" FontWeight="Bold" Foreground="#21305B" Margin="0,0,0,8" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock x:Name="TxtMessage" Text="Mensaje" FontSize="16" Foreground="#21305B" TextWrapping="Wrap" Grid.Row="1" Margin="0,0,0,20"></TextBlock>
+
+            <StackPanel x:Name="BtnPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="2"></StackPanel>
+        </Grid> 
+    </Border>
+    
+</Window>

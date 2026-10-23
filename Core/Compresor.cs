@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace SimpleZip.Core
 {
     public static class Compresor
     {
-        public static string Compress(string originalFolder, string destinationFolder, string folderName)
+        public static string Compress(string originalFolder, string destinationFolder, string folderName, CancellationToken cancellationToken = default)
         {
             // Verificación y normalización de rutas
             if (string.IsNullOrWhiteSpace(originalFolder) || string.IsNullOrWhiteSpace(destinationFolder)) 
@@ -21,51 +22,81 @@ namespace SimpleZip.Core
 
             if (!Directory.Exists(originalFolder)) 
                 throw new InvalidOperationException("La carpeta ingresada no existe o no se puede operar sobre ella");
-            
+
+            if (!Directory.EnumerateFileSystemEntries(originalFolder).Any())
+                throw new InvalidOperationException("La carpeta esta vacía, agregue al menos 1 archivo para comprimir");
+
             string originFolderNorm = Path.GetFullPath(originalFolder).TrimEnd('\\') + '\\';
             string destinationFolderNorm = Path.GetFullPath(destinationFolder).TrimEnd('\\') + '\\';
 
             if (destinationFolderNorm.StartsWith(originFolderNorm, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("No se puede guardar el Zip dentro de la misma carpeta que se comprime");
 
+            CleanTmpFiles(destinationFolderNorm);
+
             // Preparación de rutas para operar
             string baseRoute = Path.Combine(destinationFolderNorm, folderName);
             string finalRoute = baseRoute + ".zip";
             string tmpRoute = finalRoute + ".tmp";
 
-            // Creación del .zip
-            ZipFile.CreateFromDirectory(originFolderNorm, tmpRoute, CompressionLevel.Optimal, true);
-
-            // Comprobación de existencia y manejo de duplicados
-            if (File.Exists(finalRoute))
+            try
             {
-                string filename = Path.GetFileNameWithoutExtension(finalRoute);
-                string extension = Path.GetExtension(finalRoute);
-                string directory = Path.GetDirectoryName(finalRoute);
+                cancellationToken.ThrowIfCancellationRequested();
+                // Creación del .zip
+                ZipFile.CreateFromDirectory(originFolderNorm, tmpRoute, CompressionLevel.Optimal, true);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                bool limitFound = false;
-                int counterCopies = 1;
-
-                while(!limitFound)
+                if (File.Exists(finalRoute))
                 {
-                    string filenameFind = Path.Combine(directory, $"{filename} ({counterCopies}){extension}");
-
-                    if (!File.Exists(filenameFind))
-                    {
-                        finalRoute = filenameFind;
-                        limitFound = true;
-                    }
-
-                    counterCopies++;
+                    File.Delete(finalRoute);
                 }
+
+                // Mover el zip final
+                File.Move(tmpRoute, finalRoute);
+
+                // Retornar la nueva ruta
+                return finalRoute;
             }
-
-            // Mover el zip final
-            File.Move(tmpRoute, finalRoute);
-
-            // Retornar la nueva ruta
-            return finalRoute;
+            catch(OperationCanceledException)
+            {
+                throw;
+            }
+            catch (UnauthorizedAccessException) {
+                throw new InvalidOperationException("No tenemos permiso para acceder a algunos archivos, asegúrese que no estan siendo usados por otro programa");
+            }
+            catch (PathTooLongException)
+            {
+                throw new InvalidOperationException("La ruta de la carpeta es demasiado larga, intenta mover la carpeta a un lugar más cercano al disco (C:)");
+            }
+            catch(IOException ioEx)
+            {
+                throw new InvalidOperationException("No se pudo crear el archivo. Es posible que otro programa esté usando la carpeta o que el disco esté lleno.", ioEx);
+            }
+            finally
+            {
+                if (File.Exists(tmpRoute))
+                {
+                    try
+                    {
+                        File.Delete(tmpRoute);
+                    }
+                    catch { }
+                }
+            }            
         }
 
+        private static void CleanTmpFiles(string destinationFolderNorm)
+        {
+            try
+            {
+                string[] tmpFiles = Directory.GetFiles(destinationFolderNorm, "*.tmp");
+
+                foreach (string tmpFile in tmpFiles)
+                {
+                    File.Delete(tmpFile);
+                }
+            }
+            catch { }
+        }
     }
 }
